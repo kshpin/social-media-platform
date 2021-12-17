@@ -1,14 +1,15 @@
 import "./App.css";
 
 import React from "react";
-import { usePosts } from "./posts/postHooks";
 import LoadingMessage from "./auxiliaryMessages/LoadingMessage";
 import SystemMessage from "./auxiliaryMessages/SystemMessage";
 import Posts from "./posts/Posts";
 import NewPostPrompt from "./posts/NewPostPrompt";
+import { api } from "./api/api";
+import { useRequest } from "./api/apiHooks";
 
 function App() {
-    let postsData = usePosts("user-1");
+    let postsData = useRequest(api.posts.list);
 
     if (postsData.loading) {
         return <LoadingMessage />;
@@ -20,7 +21,7 @@ function App() {
 
     return (
         <div className="App">
-            <Posts posts={postsData.list} />
+            <Posts posts={postsData.result} />
             <NewPostPrompt />
         </div>
     );

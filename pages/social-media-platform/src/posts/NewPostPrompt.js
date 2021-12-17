@@ -1,86 +1,54 @@
+import { useCallback } from "react";
+
 import React from "react";
 import { useState } from "react";
+import { api } from "../api/api";
 import SystemMessage from "../auxiliaryMessages/SystemMessage";
-import Post from "./Post";
+import EditPost from "./EditPost";
+
+const EMPTY_POST = {
+    title: "",
+    username: "",
+    content: "",
+};
 
 export default function NewPostPrompt() {
-    let [title, setTitle] = useState("");
-    let [username, setUsername] = useState("");
-    let [content, setContent] = useState("");
+    let [newPost, setNewPost] = useState(EMPTY_POST);
+
+    //useEffect(()=>setNewPost(EMPTY_POST),[setNewPost]);
+
     let [created, setCreated] = useState(false);
     let [error, setError] = useState();
 
-    function handleTitleChange(event) {
-        setTitle(event.target.value);
-    }
+    let handleSubmit = useCallback(
+        async (post) => {
+            setCreated(false);
+            setError(null);
 
-    function handleUsernameChange(event) {
-        setUsername(event.target.value);
-    }
-
-    function handleContentChange(event) {
-        setContent(event.target.value);
-    }
-
-    function handleSubmit(event) {
-        setCreated(false);
-        setError(null);
-
-        (async () => {
             try {
-                let newPostResp = await fetch(`/posts`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        title,
-                        username,
-                        content,
-                    }),
-                });
-
-                if (newPostResp.status !== 201) {
-                    throw new Error(
-                        `New post error, status: ${
-                            newPostResp.status
-                        }, message: ${await newPostResp.text()}`
-                    );
-                }
+                await api.posts.add({ post });
             } catch (err) {
-                setError("Could not make new post: " + err.message);
+                setError("Could not make new post");
+                console.error(err);
+                return;
             }
-        })();
 
-        setTitle("");
-        setUsername("");
-        setContent("");
-        setCreated(true);
-        event.preventDefault();
-    }
+            setCreated(true);
+            setNewPost(EMPTY_POST);
+        },
+        [setCreated, setError, setNewPost]
+    );
 
-    if (error) {
-        return <SystemMessage error={error} />;
-    }
-
-    if (created) {
-        return (
-            <SystemMessage
-                header={"Post Created!"}
-                message={"Refresh the page to see it"}
-            />
-        );
-    }
-
-    let promptInfo = {
-        title,
-        handleTitleChange,
-        username,
-        handleUsernameChange,
-        content,
-        handleContentChange,
-        handleSubmit,
-    };
-
-    return <Post prompt={promptInfo} />;
+    return (
+        <div>
+            {created && (
+                <SystemMessage
+                    header={"Post Created!"}
+                    message={"Refresh the page to see it"}
+                />
+            )}
+            {error && <SystemMessage error={error} />}
+            <EditPost post={newPost} onSubmit={handleSubmit} />
+        </div>
+    );
 }
