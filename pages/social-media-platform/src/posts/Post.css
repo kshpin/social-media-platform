@@ -1,0 +1,40 @@
+.Post {
+    margin: 10px;
+    padding: 10px;
+
+    background-color: paleturquoise;
+}
+
+.PostComponent {
+    box-sizing: border-box;
+    width: 100%;
+
+    margin: 0px;
+    padding: 10px;
+
+    background-color: transparent;
+    font-family: sans-serif;
+    border: none;
+}
+
+.Title {
+    background-color: skyblue;
+    font-size: 24px;
+}
+
+.Username {
+    color: #3f3f3f;
+    font-size: 12px;
+}
+
+.Content {
+    font-size: 16px;
+}
+
+.Post.Prompt {
+    background-color: lightgoldenrodyellow;
+}
+
+.Title.Prompt {
+    background-color: yellow;
+}

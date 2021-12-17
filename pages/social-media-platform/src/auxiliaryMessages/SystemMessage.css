@@ -1,0 +1,8 @@
+.SystemMessage {
+    text-align: center;
+    color: lightgreen;
+}
+
+.Error {
+    color: lightcoral;
+}
