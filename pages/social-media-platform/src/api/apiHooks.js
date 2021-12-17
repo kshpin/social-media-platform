@@ -1,23 +1,21 @@
 import { useState, useEffect } from "react";
 
-export function usePosts() {
-    let [list, setList] = useState();
+export function useRequest(request, params) {
+    let [result, setResult] = useState();
     let [error, setError] = useState();
     let [loading, setLoading] = useState(true);
 
     useEffect(() => {
         setLoading(true);
         setError(null);
-        setList(null);
+        setResult(null);
 
         // fetch data from server
         (async () => {
             try {
-                let postsResp = await fetch(
-                    `${process.env.REACT_APP_API_SERVER}/posts`
-                );
+                let postsResp = await request(params);
 
-                if (postsResp.status !== 200) {
+                if (!postsResp.ok) {
                     throw new Error(
                         "Request error, status: " + postsResp.status
                     );
@@ -28,19 +26,20 @@ export function usePosts() {
                     throw new Error("Server returned incorrect data");
                 }
 
-                let list = await postsResp.json();
+                let result = await postsResp.json();
 
-                setList(list);
+                setResult(result);
                 setLoading(false);
             } catch (err) {
-                setError("Could not load posts: " + err.message);
+                setError("Could not process request");
+                console.error(err);
                 setLoading(false);
             }
         })();
-    }, [setList, setError, setLoading]);
+    }, [setResult, setError, setLoading, params, request]);
 
     return {
-        list,
+        result,
         error,
         loading,
     };
