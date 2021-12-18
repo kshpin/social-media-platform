@@ -23,7 +23,7 @@ const makeRequestAndPreprocess = async (url, method, payload) => {
             throw new Error(
                 `${method} request error, status: ${
                     response.status
-                }, message: ${JSON.stringify(body)}`
+                }, body: ${JSON.stringify(body)}`
             );
         }
 
