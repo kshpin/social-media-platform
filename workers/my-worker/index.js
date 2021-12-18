@@ -65,14 +65,18 @@ async function handlePost(request) {
             headers: request.headers,
         });
 
-        if (authorization.status === 498) {
+        if (authorization.status === 498 || authorization.status === 401) {
             // unauthorized
             return constructResponse("Unauthorized", 401, request);
         }
 
         if (!authorization.ok) {
             // internal server error
-            return constructResponse("Internal Server Error", 500, request);
+            return constructResponse(
+                `Couldn't authenticate existing user, auth ${authorization.status}`,
+                500,
+                request
+            );
         }
     } else {
         // new user
@@ -83,7 +87,11 @@ async function handlePost(request) {
             // something went wrong with the authentication server
 
             // internal server error
-            return constructResponse("Couldn't authenticate", 500, request);
+            return constructResponse(
+                `Couldn't authenticate new user, auth ${authorization.status}`,
+                500,
+                request
+            );
         }
 
         // add the user to our list
