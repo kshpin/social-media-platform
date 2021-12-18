@@ -37,6 +37,8 @@ async function handlePost(request) {
         return constructResponse("Not JSON!", 400, request);
     }
 
+    let requestClone = request.clone();
+
     let newPost = await request.json();
     if (
         !newPost.hasOwnProperty("title") ||
@@ -60,43 +62,16 @@ async function handlePost(request) {
     if (users.includes(newPost.username)) {
         // existing user
 
-        // get cookies
-        let cookies = request.headers.get("Cookie") || [];
+        authorization = await fetch(`${AUTH_SERVER}/verify`, requestClone);
 
-        console.log(cookies.length);
-
-        let tokens = cookies.filter(cookie => cookie[0] === "token");
-
-        if (tokens.length === 0) {
-            // no token provided
-
+        if (authorization.status === 498) {
             // unauthorized
             return constructResponse("Unauthorized", 401, request);
         }
 
-        console.log(tokens.length);
-
-        let verified = false;
-        for (let token of tokens) {
-            authorization = await fetch(`${AUTH_SERVER}/verify`, request);
-
-            if (authorization.ok) {
-                verified = true;
-                break;
-            }
-
-            if (!authorization.ok && authorization.status !== 498) {
-                console.log(authorization.status);
-                console.log("existing user, 500");
-
-                // internal server error
-                return constructResponse("Internal Server Error", 500, request);
-            }
-        }
-
-        if (!verified) {
-            // unauthorized
-            return constructResponse("Unauthorized", 401, request);
+        if (!authorization.ok) {
+            // internal server error
+            return constructResponse("Internal Server Error", 500, request);
         }
     } else {
         // new user
@@ -122,7 +97,14 @@ async function handlePost(request) {
     await MY_KV.put(key, JSON.stringify(newPost));
 
     // created
-    return constructResponse("Created", 201, request);
+    return new Response(JSON.stringify({ message: "Created" }), {
+        status: 201,
+        headers: {
+            "content-type": "application/json",
+            "Access-Control-Allow-Origin": request.headers.get("origin"),
+        },
+        ...authorization,
+    });
 }
 
 addEventListener("fetch", event => {
