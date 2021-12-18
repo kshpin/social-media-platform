@@ -1,28 +1,20 @@
-addEventListener("fetch", event => {
-    let method = event.request.method.toUpperCase();
-
-    if (method === "GET") {
-        event.respondWith(handleGet(event.request));
-    } else if (method === "POST") {
-        event.respondWith(handlePost(event));
-    } else {
-        // not a handled type
-        event.respondWith(
-            new Response("Only GET and POST are supported", {
-                status: 501, // not implemented
-            })
-        );
-    }
-});
+function constructResponse(message, status, request) {
+    return new Response(JSON.stringify({ message }), {
+        status,
+        headers: {
+            "content-type": "application/json",
+            "Access-Control-Allow-Origin": request.headers.get("origin"),
+        },
+    });
+}
 
 async function handleGet(request) {
     if (!/.dev\/posts/.test(request.url)) {
         // there has to be a better way to check what the endpoint is
         // but I don't know it :/
 
-        return new Response("Only GET /posts is supported", {
-            status: 404, // not found
-        });
+        // not found
+        return constructResponse("Only GET /posts is supported", 404, request);
     }
 
     // the storage also includes other information, prefix limits us to posts only
@@ -35,31 +27,29 @@ async function handleGet(request) {
         posts.push(JSON.parse(await MY_KV.get(key.name)));
     }
 
-    return new Response(JSON.stringify(posts), {
-        headers: { "content-type": "application/json" },
-    });
+    return constructResponse(posts, 200, request);
 }
 
-async function handlePost(event) {
-    let contentType = event.request.headers.get("content-type");
+async function handlePost(request) {
+    let contentType = request.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
-        return new Response("Not JSON!", {
-            status: 400, // bad request
-        });
+        // bad request
+        return constructResponse("Not JSON!", 400, request);
     }
 
-    let newPost = await event.request.json();
+    let newPost = await request.json();
     if (
         !newPost.hasOwnProperty("title") ||
         !newPost.hasOwnProperty("username") ||
         !newPost.hasOwnProperty("content")
     ) {
         // invalid format
+
+        // unprocessable entity
         return new Response(
             "Wrong post format! Must include title, username, and content",
-            {
-                status: 422, // unprocessable entity
-            }
+            422,
+            request
         );
     }
 
@@ -70,32 +60,54 @@ async function handlePost(event) {
     if (users.includes(newPost.username)) {
         // existing user
 
-        // don't actually need to do any sort of cookie processing ourselves, just forward the request
-        authorization = await fetch("verify", {
-            headers: event.request.headers,
-        });
+        // get cookies
+        let cookies = request.headers.get("Cookie") || [];
 
-        if (authorization.status === 498) {
-            return new Response("Unauthorized", {
-                status: 401, // unauthorized
-            });
+        console.log(cookies.length);
+
+        let tokens = cookies.filter(cookie => cookie[0] === "token");
+
+        if (tokens.length === 0) {
+            // no token provided
+
+            // unauthorized
+            return constructResponse("Unauthorized", 401, request);
         }
 
-        if (!authorization.ok) {
-            return new Response("Internal Server Error", {
-                status: 500, // internal server error
-            });
+        console.log(tokens.length);
+
+        let verified = false;
+        for (let token of tokens) {
+            authorization = await fetch(`${AUTH_SERVER}/verify`, request);
+
+            if (authorization.ok) {
+                verified = true;
+                break;
+            }
+
+            if (!authorization.ok && authorization.status !== 498) {
+                console.log(authorization.status);
+                console.log("existing user, 500");
+
+                // internal server error
+                return constructResponse("Internal Server Error", 500, request);
+            }
+        }
+
+        if (!verified) {
+            // unauthorized
+            return constructResponse("Unauthorized", 401, request);
         }
     } else {
         // new user
 
-        authorization = await fetch(`auth/${newPost.username}`);
+        authorization = await fetch(`${AUTH_SERVER}/auth/${newPost.username}`);
 
         if (!authorization.ok) {
             // something went wrong with the authentication server
-            return new Response("Couldn't authenticate", {
-                status: 500, // internal server error
-            });
+
+            // internal server error
+            return constructResponse("Couldn't authenticate", 500, request);
         }
 
         // add the user to our list
@@ -109,8 +121,38 @@ async function handlePost(event) {
 
     await MY_KV.put(key, JSON.stringify(newPost));
 
-    return new Response("Created", {
-        ...authorization,
-        status: 201, // created
-    });
+    // created
+    return constructResponse("Created", 201, request);
 }
+
+addEventListener("fetch", event => {
+    let method = event.request.method.toUpperCase();
+
+    if (method === "GET") {
+        event.respondWith(handleGet(event.request));
+    } else if (method === "POST") {
+        event.respondWith(handlePost(event.request));
+    } else if (method === "OPTIONS") {
+        // for CORS preflight
+        event.respondWith(
+            new Response(null, {
+                status: 204, // no content
+                headers: {
+                    "Access-Control-Allow-Origin": event.request.headers.get("origin"),
+                    "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
+                    "Access-Control-Allow-Headers": "Content-Type",
+                },
+            })
+        );
+    } else {
+        // not a handled type
+        event.respondWith(
+            new Response("Only GET and POST are supported", {
+                status: 501, // not implemented
+                headers: {
+                    "Access-Control-Allow-Origin": event.request.headers.get("origin"),
+                },
+            })
+        );
+    }
+});
