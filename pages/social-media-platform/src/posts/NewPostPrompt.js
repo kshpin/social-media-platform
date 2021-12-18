@@ -15,8 +15,6 @@ const EMPTY_POST = {
 export default function NewPostPrompt() {
     let [newPost, setNewPost] = useState(EMPTY_POST);
 
-    //useEffect(()=>setNewPost(EMPTY_POST),[setNewPost]);
-
     let [created, setCreated] = useState(false);
     let [error, setError] = useState();
 
