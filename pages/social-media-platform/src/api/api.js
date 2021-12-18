@@ -21,7 +21,7 @@ const makeRequestAndPreprocess = async (url, method, payload) => {
 
         if (!response.ok) {
             throw new Error(
-                `GET request error, status: ${
+                `${method} request error, status: ${
                     response.status
                 }, message: ${JSON.stringify(body)}`
             );
