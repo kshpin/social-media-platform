@@ -2,36 +2,47 @@ const serverPrefix = process.env.REACT_APP_API_SERVER;
 
 const getFullUrl = (url) => `${serverPrefix}${url}`;
 
-const server = {
-    get: async (url) => await fetch(getFullUrl(url)),
-    post: async (url, payload) => {
-        try {
-            let response = await fetch(getFullUrl(url), {
-                method: "POST",
+const makeRequestAndPreprocess = async (url, method, payload) => {
+    try {
+        let response;
+        if (payload) {
+            response = await fetch(getFullUrl(url), {
+                method,
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(payload),
             });
-            if (!response.ok) {
-                throw new Error(
-                    `POST request error, status: ${
-                        response.status
-                    }, message: ${await response.text()}`
-                );
-            }
-
-            return await response.json();
-        } catch (err) {
-            console.error("POST error", err);
-            throw err;
+        } else {
+            response = await fetch(getFullUrl(url), { method });
         }
-    },
+
+        let body = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                `GET request error, status: ${
+                    response.status
+                }, message: ${JSON.stringify(body)}`
+            );
+        }
+
+        return body;
+    } catch (err) {
+        console.error("POST error", err);
+        throw err;
+    }
+};
+
+const server = {
+    get: async (url) => await makeRequestAndPreprocess(url, "GET"),
+    post: async (url, payload) =>
+        await makeRequestAndPreprocess(url, "POST", payload),
 };
 
 export const api = {
     posts: {
-        list: async () => await server.get("/posts"),
-        add: async ({ post }) => await server.post("/posts", post),
+        list: async () => (await server.get("/posts")).message,
+        add: async ({ post }) => (await server.post("/posts", post)).message,
     },
 };

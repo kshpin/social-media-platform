@@ -13,20 +13,7 @@ export function useRequest(request, params) {
         // fetch data from server
         (async () => {
             try {
-                let postsResp = await request(params);
-
-                if (!postsResp.ok) {
-                    throw new Error(
-                        "Request error, status: " + postsResp.status
-                    );
-                }
-
-                let contentType = postsResp.headers.get("content-type");
-                if (!contentType || !/json/.test(contentType)) {
-                    throw new Error("Server returned incorrect data");
-                }
-
-                let result = await postsResp.json();
+                let result = await request(params);
 
                 setResult(result);
                 setLoading(false);
