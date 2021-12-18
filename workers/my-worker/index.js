@@ -5,6 +5,7 @@ function constructResponse(message, status, request) {
             "content-type": "application/json",
             "Access-Control-Allow-Origin": request.headers.get("origin"),
         },
+        credentials: "include",
     });
 }
 
@@ -46,7 +47,7 @@ async function handlePost(request) {
         // invalid format
 
         // unprocessable entity
-        return new Response(
+        return constructResponse(
             "Wrong post format! Must include title, username, and content",
             422,
             request
@@ -104,6 +105,7 @@ async function handlePost(request) {
         },
         ...authorization,
         status: 201,
+        credentials: "include",
     });
 }
 
@@ -124,6 +126,7 @@ addEventListener("fetch", event => {
                     "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
                     "Access-Control-Allow-Headers": "Content-Type",
                 },
+                credentials: "include",
             })
         );
     } else {
@@ -134,6 +137,7 @@ addEventListener("fetch", event => {
                 headers: {
                     "Access-Control-Allow-Origin": event.request.headers.get("origin"),
                 },
+                credentials: "include",
             })
         );
     }
