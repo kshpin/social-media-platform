@@ -1,15 +1,10 @@
-# 👷 `worker-template` Hello World
+# Social Media Platform Worker
 
-A template for kick starting a Cloudflare worker project.
+This is the backend worker serving the social media platform frontend.\
+It is also responsible for communicating with the authentication server.
 
-[`index.js`](https://github.com/cloudflare/worker-template/blob/master/index.js) is the content of the Workers script.
-
-#### Wrangler
-
-To generate using [wrangler](https://github.com/cloudflare/wrangler)
+To launch, run:
 
 ```
-wrangler generate projectname https://github.com/cloudflare/worker-template
+$ wrangler dev
 ```
-
-Further documentation for Wrangler can be found [here](https://developers.cloudflare.com/workers/tooling/wrangler).
