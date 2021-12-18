@@ -8,7 +8,7 @@ const makeRequestAndPreprocess = async (url, method, payload) => {
         if (payload) {
             response = await fetch(getFullUrl(url), {
                 method,
-                credentials: "include",
+                credentials: "same-origin",
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -17,7 +17,7 @@ const makeRequestAndPreprocess = async (url, method, payload) => {
         } else {
             response = await fetch(getFullUrl(url), {
                 method,
-                credentials: "include",
+                credentials: "same-origin",
             });
         }
 

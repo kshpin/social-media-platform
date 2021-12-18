@@ -10,7 +10,6 @@ async function router(event, routerConfig) {
             try {
                 return await handler(event.request);
             } catch (err) {
-                throw err;
                 return {
                     message: `Worker error`,
                     status: 500,
@@ -139,15 +138,43 @@ async function handleFetch(event) {
         },
     });
 
-    return new Response(JSON.stringify({ message: result.message }), {
-        headers: {
-            "content-type": "application/json",
-            "Access-Control-Allow-Origin": event.request.headers.get("origin"),
-        },
-        ...result.meta,
-        status: result.status,
-        credentials: "include",
-    });
+    let body = JSON.stringify({ message: result.message });
+
+    if (result.meta) {
+        /* return new Response(body, {
+            headers: {
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": event.request.headers.get("origin"),
+                "Access-Control-Allow-Credentials": "true",
+            },
+            ...result.meta,
+            status: result.status,
+            credentials: "include",
+        }); */
+
+        let headers = new Headers(result.meta.headers);
+        headers.set("content-type", "application/json");
+        headers.set("Access-Control-Allow-Origin", event.request.headers.get("origin"));
+        headers.set("Access-Control-Allow-Credentials", "true");
+
+        const response = new Response(body, {
+            headers,
+            status: result.status,
+            credentials: "same-origin",
+        });
+
+        return response;
+    } else {
+        return new Response(body, {
+            headers: {
+                "content-type": "application/json",
+                "Access-Control-Allow-Origin": event.request.headers.get("origin"),
+                "Access-Control-Allow-Credentials": "true",
+            },
+            status: result.status,
+            credentials: "same-origin",
+        });
+    }
 }
 
 addEventListener("fetch", event => {
@@ -160,11 +187,12 @@ addEventListener("fetch", event => {
                     "Access-Control-Allow-Origin": event.request.headers.get("origin"),
                     "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
                     "Access-Control-Allow-Headers": "Content-Type",
+                    "Access-Control-Allow-Credentials": "true",
                 },
                 credentials: "include",
             })
         );
+    } else {
+        event.respondWith(handleFetch(event));
     }
-
-    event.respondWith(handleFetch(event));
 });
