@@ -37,8 +37,6 @@ async function handlePost(request) {
         return constructResponse("Not JSON!", 400, request);
     }
 
-    let requestClone = request.clone();
-
     let newPost = await request.json();
     if (
         !newPost.hasOwnProperty("title") ||
@@ -62,7 +60,9 @@ async function handlePost(request) {
     if (users.includes(newPost.username)) {
         // existing user
 
-        authorization = await fetch(`${AUTH_SERVER}/verify`, requestClone);
+        authorization = await fetch(`${AUTH_SERVER}/verify`, {
+            headers: request.headers,
+        });
 
         if (authorization.status === 498) {
             // unauthorized
@@ -98,12 +98,12 @@ async function handlePost(request) {
 
     // created
     return new Response(JSON.stringify({ message: "Created" }), {
-        status: 201,
         headers: {
             "content-type": "application/json",
             "Access-Control-Allow-Origin": request.headers.get("origin"),
         },
         ...authorization,
+        status: 201,
     });
 }
 
