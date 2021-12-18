@@ -4,7 +4,7 @@ import React from "react";
 import { useState } from "react";
 import { api } from "../api/api";
 import SystemMessage from "../auxiliaryMessages/SystemMessage";
-import EditPost from "./EditPost";
+import PostEdit from "./PostEdit";
 
 const EMPTY_POST = {
     title: "",
@@ -46,7 +46,7 @@ export default function NewPostPrompt() {
                 />
             )}
             {error && <SystemMessage error={error} />}
-            <EditPost post={newPost} onSubmit={handleSubmit} />
+            <PostEdit post={newPost} onSubmit={handleSubmit} />
         </div>
     );
 }

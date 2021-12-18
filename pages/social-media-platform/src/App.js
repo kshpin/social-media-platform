@@ -3,7 +3,7 @@ import "./App.css";
 import React from "react";
 import LoadingMessage from "./auxiliaryMessages/LoadingMessage";
 import SystemMessage from "./auxiliaryMessages/SystemMessage";
-import Posts from "./posts/Posts";
+import PostList from "./posts/PostList";
 import NewPostPrompt from "./posts/NewPostPrompt";
 import { api } from "./api/api";
 import { useRequest } from "./api/apiHooks";
@@ -21,7 +21,7 @@ function App() {
 
     return (
         <div className="App">
-            <Posts posts={postsData.result} />
+            <PostList posts={postsData.result} />
             <NewPostPrompt />
         </div>
     );

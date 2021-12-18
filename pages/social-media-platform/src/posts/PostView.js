@@ -1,7 +1,7 @@
 import React from "react";
 import "./Post.css";
 
-export default function Post({ post }) {
+export default function PostView({ post }) {
     return (
         <div className="Post">
             <div className="PostComponent Title">{post.title}</div>

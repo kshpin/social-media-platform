@@ -3,7 +3,7 @@ import { useCallback, useState, useEffect } from "react";
 import React from "react";
 import "./Post.css";
 
-export default function EditPost({ post, onSubmit }) {
+export default function PostEdit({ post, onSubmit }) {
     let [editPost, setEditPost] = useState();
 
     useEffect(() => {

@@ -1,12 +1,12 @@
-import Post from "./Post";
+import PostView from "./PostView";
 
 import React from "react";
 
-export default function Posts({ posts }) {
+export default function PostList({ posts }) {
     return (
         <div className="Posts">
             {posts.map((post, i) => (
-                <Post post={post} key={i} />
+                <PostView post={post} key={i} />
             ))}
         </div>
     );
