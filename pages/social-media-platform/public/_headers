@@ -1,2 +1,2 @@
 /*
-  Access-Control-Allow-Origin: https://my-worker.kshpin.workers.dev
+  Access-Control-Allow-Origin: *
