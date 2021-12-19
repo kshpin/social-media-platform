@@ -46,7 +46,7 @@ const server = {
 
 export const api = {
     posts: {
-        list: async () => (await server.get("/posts")).message,
-        add: async ({ post }) => (await server.post("/posts", post)).message,
+        list: async () => await server.get("/posts"),
+        add: async ({ post }) => await server.post("/posts", post),
     },
 };
