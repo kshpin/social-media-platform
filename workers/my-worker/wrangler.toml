@@ -1,10 +1,10 @@
 name = "my-worker"
-type = "javascript"
+type = "webpack"
 
 account_id = "2242258b4c7493340d896312214f0571"
 workers_dev = true
-route = ""
-zone_id = ""
+route = "api.glaximo.com/*"
+zone_id = "737c4a4b005e394e8bd9a8e5fef8db8b"
 compatibility_date = "2021-12-13"
 
 kv_namespaces = [
@@ -13,4 +13,4 @@ kv_namespaces = [
 ]
 
 [vars]
-AUTH_SERVER = "https://closely-asthma-yourself-mime.trycloudflare.com"
+AUTH_SERVER = "https://east-bra-risk-connected.trycloudflare.com"
