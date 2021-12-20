@@ -21,8 +21,10 @@ const makeRequestAndPreprocess = async (url, method, payload) => {
             });
         }
 
+        let body;
+
         if (method === "GET") {
-            let body = await response.json();
+            body = await response.json();
 
             if (!response.ok) {
                 throw new Error(
@@ -32,7 +34,7 @@ const makeRequestAndPreprocess = async (url, method, payload) => {
                 );
             }
         } else {
-            let body = await response.text();
+            body = await response.text();
 
             if (!response.ok) {
                 throw new Error(
