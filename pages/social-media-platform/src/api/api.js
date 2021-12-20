@@ -21,14 +21,24 @@ const makeRequestAndPreprocess = async (url, method, payload) => {
             });
         }
 
-        let body = await response.json();
+        if (method === "GET") {
+            let body = await response.json();
 
-        if (!response.ok) {
-            throw new Error(
-                `${method} request error, status: ${
-                    response.status
-                }, body: ${JSON.stringify(body)}`
-            );
+            if (!response.ok) {
+                throw new Error(
+                    `${method} request error, status: ${
+                        response.status
+                    }, body: ${JSON.stringify(body)}`
+                );
+            }
+        } else {
+            let body = await response.text();
+
+            if (!response.ok) {
+                throw new Error(
+                    `${method} request error, status: ${response.status}, body: ${body}`
+                );
+            }
         }
 
         return body;
