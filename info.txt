@@ -1,6 +1,0 @@
-Git Credentials:
-Username: tDyU3Lwqkt0QawxfamSIyl9QGTN2GE
-Password: GuNf4kFY
-
-Workers URL: 
-Pages URL: 
